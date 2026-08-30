@@ -23,7 +23,6 @@ import net.sistr.littlemaidmodelloader.util.Tuple;
 import net.sistr.littlemaidmobresurgence.LMMRMod;
 import net.sistr.littlemaidmobresurgence.entity.LittleMaidEntity;
 import net.sistr.littlemaidmobresurgence.entity.LittleMaidScreenHandler;
-import net.sistr.littlemaidmobresurgence.entity.MaidMood;
 import net.sistr.littlemaidmobresurgence.entity.util.MovingMode;
 import net.sistr.littlemaidmobresurgence.network.*;
 
@@ -340,19 +339,16 @@ public class LittleMaidScreen extends HandledScreen<LittleMaidScreenHandler> {
         return stateText;
     }
 
-    /** 女仆GUI主状态：仅显示 当前情绪 + 好感度等级 + 饥饿值。详细数值见情绪面板。 */
+    /**
+     * [zh] 女仆主 GUI 右侧状态：仅显示饥饿值（情绪与好感度等级已移入情绪面板，不在主界面展示）。
+     * [en] Right-side status in the maid GUI: only the hunger value (emotion and favorability level moved to the emotion panel).
+     * [ja] メイドGUI右側のステータス：満腹度のみ表示（感情と好感度レベルは感情パネルへ移動済み）。
+     */
     public String getStatusText() {
-        MaidMood.Emotion emo = owner.getEmotion();
-        String emotion =
-                Text.translatable("emotion.littlemaidmobresurgence." + emo.name()).getString();
-        // DataTracker 同步值计算等级，客户端才能实时变化
-        String level = "Lv" + owner.getFavorabilityLevelValue();
-        String hunger =
-                Text.translatable(
-                                "gui.littlemaidmobresurgence.littlemaid.status.hunger",
-                                owner.getHungerValue())
-                        .getString();
-        return emotion + " " + level + " " + hunger;
+        return Text.translatable(
+                        "gui.littlemaidmobresurgence.littlemaid.status.hunger",
+                        owner.getHungerValue())
+                .getString();
     }
 
     @Override
