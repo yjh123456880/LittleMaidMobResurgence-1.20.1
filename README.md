@@ -6,14 +6,41 @@
 
 ---
 
+## 致谢与代码来源 / Credits & Upstream Sources / 謝辞とコードの出典
+
+本模组基于以下前辈小女仆模组的**代码与架构**二次开发，严格署名并衷心感谢各位原作者：
+
+- **LittleMaidMob（1.7.10）** — 作者 **MMM**（MMM666）：https://github.com/MMM666/littleMaidMob
+- **LittleMaidReengaged / 小女改（1.12.2）** — 作者 **firis-games（firis）** 与 **Verclene**：https://github.com/firis-games/LittleMaidReengagedFirisPatch
+- **LittleMaidReBirth 重置版（1.20.1）** — 作者 **Sistr**（SistrScarlet）：https://github.com/SistrScarlet/LittleMaidReBirth-Architectury
+- **LittleMaidModelLoader（LMML，小女仆模型加载前置）** — 作者 **Sistr**（SistrScarlet）
+
+[en] This mod is built upon the **code and architecture** of the following predecessor little-maid mods.
+Full credit and heartfelt thanks to their original authors:
+
+- LittleMaidMob (1.7.10) — **MMM** (MMM666): https://github.com/MMM666/littleMaidMob
+- LittleMaidReengaged / 小女改 (1.12.2) — **firis-games** & **Verclene**: https://github.com/firis-games/LittleMaidReengagedFirisPatch
+- LittleMaidReBirth Remake (1.20.1) — **Sistr** (SistrScarlet): https://github.com/SistrScarlet/LittleMaidReBirth-Architectury
+- LittleMaidModelLoader (LMML, model loader prerequisite) — **Sistr** (SistrScarlet)
+
+[ja] 本モッドは以下の先人メイドモッド群の**コード・アーキテクチャ**を基に開発しています。
+原作者の皆様に心からの敬意と感謝を捧げます：
+
+- LittleMaidMob (1.7.10) — **MMM** 氏（MMM666）：https://github.com/MMM666/littleMaidMob
+- LittleMaidReengaged / 小女改 (1.12.2) — **firis-games** 氏と **Verclene** 氏：https://github.com/firis-games/LittleMaidReengagedFirisPatch
+- LittleMaidReBirth リメイク版 (1.20.1) — **Sistr** 氏（SistrScarlet）：https://github.com/SistrScarlet/LittleMaidReBirth-Architectury
+- LittleMaidModelLoader（LMML、モデルローダー前提） — **Sistr** 氏（SistrScarlet）
+
+---
+
 ## 中文简介
 
 **小女仆：归来（LittleMaidMobResurgence）** 是基于前辈模组架构二次开发的 Minecraft **1.20.1 Forge** 小女仆模组：
 
-- **1.7.10 LittleMaidMob**（初代小女仆模组）
-- **1.12.2 小女改（LittleMaidReengaged）**
-- **1.20.1 LittleMaidReBirth 重置版**
-- **LittleMaidModelLoader（LMML，小女仆模型加载前置）**
+- **1.7.10 LittleMaidMob**（初代小女仆模组，作者 MMM）
+- **1.12.2 小女改（LittleMaidReengaged）**（作者 firis-games / Verclene）
+- **1.20.1 LittleMaidReBirth 重置版**（作者 Sistr）
+- **LittleMaidModelLoader（LMML，小女仆模型加载前置）**（作者 Sistr）
 
 衷心感谢以上所有前辈模组作者们的开创性工作！本模组保留并重构了经典的「契约-召唤-雇佣-工作-战斗-模型/皮肤」体系，
 并在此基础上新增了大量拟人化玩法。
@@ -63,10 +90,10 @@ $env:JAVA_HOME = '<你的 JDK 17 路径>'
 **LittleMaidMobResurgence** is a Minecraft **1.20.1 Forge** little-maid mod developed on the architecture of the
 predecessor maid mods:
 
-- **LittleMaidMob (1.7.10)**
-- **LittleMaidReengaged (1.12.2)**
-- **LittleMaidReBirth Remake (1.20.1)**
-- **LittleMaidModelLoader (LMML)**
+- **LittleMaidMob (1.7.10)** by MMM
+- **LittleMaidReengaged (1.12.2)** by firis-games & Verclene
+- **LittleMaidReBirth Remake (1.20.1)** by Sistr
+- **LittleMaidModelLoader (LMML)** by Sistr
 
 Special thanks to all the original mod authors! The classic contract/summon/employ/work/battle/model-skin system is
 kept and rebuilt, with many new anthropomorphic features on top.
@@ -117,10 +144,10 @@ components keep their original licenses; MIT applies only to this project's own 
 **LittleMaidMobResurgence** は、先人メイドモッド群のアーキテクチャ上に開発した Minecraft **1.20.1 Forge** の
 メイドモッドです：
 
-- **LittleMaidMob (1.7.10)**
-- **LittleMaidReengaged 小女改 (1.12.2)**
-- **LittleMaidReBirth リメイク版 (1.20.1)**
-- **LittleMaidModelLoader（LMML）**
+- **LittleMaidMob (1.7.10)** — MMM 氏
+- **LittleMaidReengaged 小女改 (1.12.2)** — firis-games 氏・Verclene 氏
+- **LittleMaidReBirth リメイク版 (1.20.1)** — Sistr 氏
+- **LittleMaidModelLoader（LMML）** — Sistr 氏
 
 先人モッド作者の皆様に心より感謝します。古典的な「契約・召喚・雇用・作業・戦闘・モデル/スキン」体系を
 維持・再構築し、その上に多数の擬人化要素を追加しました。

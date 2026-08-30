@@ -22,16 +22,20 @@ SOFTWARE.
 
 ---
 
-本项目基于并致谢前辈小女仆模组系列（保留其原始许可证）：LittleMaidMob (1.7.10)、
-LittleMaidReengaged 小女改 (1.12.2)、LittleMaidReBirth 重置版 (1.20.1) 与
-LittleMaidModelLoader (LMML)。以上前辈作品及其内嵌组件（含
-`net.sistr.littlemaidmodelloader` 包）各自仍受其原许可证约束（LittleMaid Licence 等），
-本 MIT 许可证仅适用于本项目自身新增与改编的本项目代码。
+本项目基于并致谢前辈小女仆模组系列的代码与架构（保留其原始许可证）：
+- LittleMaidMob (1.7.10) — 作者 MMM（https://github.com/MMM666/littleMaidMob）
+- LittleMaidReengaged 小女改 (1.12.2) — 作者 firis-games 与 Verclene（https://github.com/firis-games/LittleMaidReengagedFirisPatch）
+- LittleMaidReBirth 重置版 (1.20.1) 与 LittleMaidModelLoader (LMML) — 作者 Sistr（https://github.com/SistrScarlet/LittleMaidReBirth-Architectury）
+以上前辈作品及其内嵌组件（含 `net.sistr.littlemaidmodelloader` 包）各自仍受其原许可证约束
+（如 LittleMaid Licence：© MMM, EMB4, Verclene, firis-games, Sistr）；本 MIT 许可证仅适用于本项目自身新增与改编的代码。
 
-This project is based on and thanks to the predecessor little-maid mod series
-(which retain their original licenses): LittleMaidMob (1.7.10),
-LittleMaidReengaged (1.12.2), LittleMaidReBirth Remake (1.20.1) and
-LittleMaidModelLoader (LMML). The predecessor works and their bundled
-components (including the `net.sistr.littlemaidmodelloader` package) remain
-under their respective original licenses (e.g. the LittleMaid Licence); this
-MIT license applies only to this project's own new and adapted code.
+This project is based on and thanks to the code and architecture of the
+predecessor little-maid mod series (which retain their original licenses):
+- LittleMaidMob (1.7.10) by MMM (https://github.com/MMM666/littleMaidMob)
+- LittleMaidReengaged (1.12.2) by firis-games & Verclene (https://github.com/firis-games/LittleMaidReengagedFirisPatch)
+- LittleMaidReBirth Remake (1.20.1) and LittleMaidModelLoader (LMML) by Sistr (https://github.com/SistrScarlet/LittleMaidReBirth-Architectury)
+The predecessor works and their bundled components (including the
+`net.sistr.littlemaidmodelloader` package) remain under their respective
+original licenses (e.g. the LittleMaid Licence: (C) MMM, EMB4, Verclene,
+firis-games, Sistr); this MIT license applies only to this project's own new
+and adapted code.
