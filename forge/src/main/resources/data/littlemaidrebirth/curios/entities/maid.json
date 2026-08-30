@@ -1,0 +1,25 @@
+{
+  "entities": [
+    "littlemaidmobresurgence:little_maid_mob"
+  ],
+  "slots": [
+    "head",
+    "necklace",
+    "back",
+    "body",
+    "hands",
+    "ring",
+    "belt",
+    "charm",
+    "curio",
+    "bracelet",
+    "scroll",
+    "pendant",
+    "heart",
+    "catastrophe",
+    "etching",
+    "spellstone",
+    "accessory",
+    "soul_stone"
+  ]
+}

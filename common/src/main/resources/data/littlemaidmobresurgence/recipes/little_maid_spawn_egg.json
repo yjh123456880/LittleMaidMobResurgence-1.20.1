@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS",
+    "CEC",
+    "SGS"
+  ],
+  "key": {
+    "S": {
+      "tag": "littlemaidmobresurgence:maids_salary"
+    },
+    "C": {
+      "tag": "littlemaidmobresurgence:maids_employable"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "E": {
+      "item": "minecraft:egg"
+    }
+  },
+  "result": {
+    "item": "littlemaidmobresurgence:little_maid_spawn_egg"
+  },
+  "show_notification": true
+}

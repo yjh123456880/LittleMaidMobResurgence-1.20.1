@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ses",
+    "dcd",
+    "ses"
+  ],
+  "key": {
+    "s": {"item": "minecraft:sugar"},
+    "e": {"item": "minecraft:egg"},
+    "c": {"item": "minecraft:cake"},
+    "d": {"item": "minecraft:lapis_lazuli"}
+  },
+  "result": {
+    "item": "littlemaidmobresurgence:maid_carry"
+  }
+}

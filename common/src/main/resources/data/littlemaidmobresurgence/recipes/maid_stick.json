@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  g",
+    " i ",
+    "s  "
+  ],
+  "key": {
+    "s": {"item": "minecraft:stick"},
+    "i": {"item": "minecraft:iron_ingot"},
+    "g": {"item": "minecraft:sugar"}
+  },
+  "result": {
+    "item": "littlemaidmobresurgence:maid_stick"
+  }
+}

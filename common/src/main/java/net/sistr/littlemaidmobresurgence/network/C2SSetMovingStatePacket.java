@@ -1,0 +1,56 @@
+package net.sistr.littlemaidmobresurgence.network;
+
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
+import net.sistr.littlemaidmobresurgence.LMMRMod;
+import net.sistr.littlemaidmobresurgence.entity.LittleMaidEntity;
+import net.sistr.littlemaidmobresurgence.entity.util.MovingMode;
+import net.sistr.littlemaidmobresurgence.entity.util.TameableUtil;
+
+/** C2Sで移動状態をセットするパケット */
+public class C2SSetMovingStatePacket {
+    public static final Identifier ID = new Identifier(LMMRMod.MODID, "set_moving_state");
+
+    @Environment(EnvType.CLIENT)
+    public static void sendC2SPacket(Entity entity, MovingMode state) {
+        PacketByteBuf buf = createC2SPacket(entity, state);
+        NetworkManager.sendToServer(ID, buf);
+    }
+
+    public static PacketByteBuf createC2SPacket(Entity entity, MovingMode state) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarInt(entity.getId());
+        buf.writeEnumConstant(state);
+        return buf;
+    }
+
+    public static void receiveC2SPacket(PacketByteBuf buf, NetworkManager.PacketContext context) {
+        int id = buf.readVarInt();
+        MovingMode movingMode = buf.readEnumConstant(MovingMode.class);
+        context.queue(() -> applyMovingStateServer(context.getPlayer(), id, movingMode));
+    }
+
+    private static void applyMovingStateServer(PlayerEntity player, int id, MovingMode movingMode) {
+        Entity entity = player.getWorld().getEntityById(id);
+        if (!(entity instanceof LittleMaidEntity maid)
+                || TameableUtil.getTameOwnerUuid(maid)
+                        .filter(ownerId -> ownerId.equals(player.getUuid()))
+                        .isEmpty()) {
+            return;
+        }
+        if (maid.isStrike()) {
+            return;
+        }
+        maid.setMovingMode(movingMode);
+        maid.getNavigation().stop();
+        if (movingMode == MovingMode.FREEDOM) {
+            maid.setFreedomPos(entity.getBlockPos());
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "net.sistr.littlemaidmobresurgence.mixin.forge",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "mixins": [
+    "MixinLivingEntityMaidInventory"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

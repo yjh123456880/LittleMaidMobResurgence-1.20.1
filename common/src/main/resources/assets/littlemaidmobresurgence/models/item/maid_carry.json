@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "littlemaidmobresurgence:item/maidporter_0"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1.0
+      },
+      "model": "littlemaidmobresurgence:item/maid_carry_filled"
+    }
+  ]
+}

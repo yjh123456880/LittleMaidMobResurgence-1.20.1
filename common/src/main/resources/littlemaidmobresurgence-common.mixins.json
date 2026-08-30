@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "package": "net.sistr.littlemaidmobresurgence.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "mixins": [
+    "CrossbowItemInvoker",
+    "ItemEntityAccessor",
+    "MeleeAttackGoalAccessor",
+    "MixinAbstractFurnaceBlockEntity",
+    "MixinBrewingStandBlockEntity",
+    "MixinCrossBowItem",
+    "MixinExperienceOrbEntity",
+    "MixinItemEntity",
+    "MixinItemEntityAntiDamage",
+    "MixinLivingEntityDamage",
+    "MixinPlayerEntity",
+    "MixinRangedWeaponItem",
+    "MixinSaddleItem",
+    "MixinServerPlayerEntity",
+    "PersistentProjectileEntityAccessor",
+    "ProjectileEntityAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,50 @@
+modLoader = "javafml"
+loaderVersion = "[46,)"
+displayURL = "https://github.com/yjh123456880/LittleMaidMobResurgence-1.20.1"
+issueTrackerURL = "https://github.com/yjh123456880/LittleMaidMobResurgence-1.20.1"
+license = "MIT"
+
+[[mods]]
+modId = "littlemaidmobresurgence"
+version = "${version}"
+displayName = "LittleMaidMobResurgence"
+authors = "QIEYYYJ"
+credits = "Based on and thanks to the little-maid mod series: LittleMaidMob (1.7.10) / LittleMaidReengaged (1.12.2) / LittleMaidReBirth (1.20.1) / LittleMaidModelLoader (Sistr)"
+description = "小女仆：归来（LittleMaidMobResurgence）—— 基于 LittleMaidMob (1.7.10)、小女改 (1.12.2)、LittleMaidReBirth (1.20.1) 及 LittleMaidModelLoader 架构二次开发的小女仆模组。/ A little maid mod built on the architecture of LittleMaidMob, LittleMaidReengaged, LittleMaidReBirth and LittleMaidModelLoader. / 先人メイドモッド群のアーキテクチャ上に開発したメイドモッド。"
+logoFile = "logo.png"
+
+[[dependencies.littlemaidmobresurgence]]
+modId = "forge"
+mandatory = true
+versionRange = "[46,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.littlemaidmobresurgence]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.littlemaidmobresurgence]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.littlemaidmobresurgence]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[11.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# Curios 饰品模组（可选软依赖：提供女仆兼容饰品槽位；未安装时女仆仍保有饰品界面，仅固定扩容背包道具槽，无兼容饰品槽）
+[[dependencies.littlemaidmobresurgence]]
+modId = "curios"
+mandatory = false
+versionRange = "[5.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

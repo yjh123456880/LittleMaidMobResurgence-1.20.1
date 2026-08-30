@@ -1,0 +1,40 @@
+package net.sistr.littlemaidmobresurgence.entity;
+
+import dev.architectury.registry.menu.ExtendedMenuProvider;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
+
+public class LMScreenHandlerFactory implements ExtendedMenuProvider {
+    private final LittleMaidEntity maid;
+
+    public LMScreenHandlerFactory(LittleMaidEntity maid) {
+        this.maid = maid;
+    }
+
+    @Override
+    public void saveExtraData(PacketByteBuf buf) {
+        buf.writeVarInt(maid.getId());
+        buf.writeByte(maid.getUnpaidDays());
+        buf.writeByte(maid.getWorkItemSlotSize());
+        buf.writeByte(maid.getBackpackUpgradeLevel());
+    }
+
+    @Override
+    public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+        return new LittleMaidScreenHandler(
+                syncId,
+                inv,
+                maid.getId(),
+                maid.getUnpaidDays(),
+                maid.getWorkItemSlotSize(),
+                maid.getBackpackUpgradeLevel());
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return maid.getDisplayName();
+    }
+}
