@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 yjh123456880
+Copyright (c) 2026 QIEYYYJ
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+本项目基于并致谢前辈小女仆模组系列（保留其原始许可证）：LittleMaidMob (1.7.10)、
+LittleMaidReengaged 小女改 (1.12.2)、LittleMaidReBirth 重置版 (1.20.1) 与
+LittleMaidModelLoader (LMML)。以上前辈作品及其内嵌组件（含
+`net.sistr.littlemaidmodelloader` 包）各自仍受其原许可证约束（LittleMaid Licence 等），
+本 MIT 许可证仅适用于本项目自身新增与改编的本项目代码。
+
+This project is based on and thanks to the predecessor little-maid mod series
+(which retain their original licenses): LittleMaidMob (1.7.10),
+LittleMaidReengaged (1.12.2), LittleMaidReBirth Remake (1.20.1) and
+LittleMaidModelLoader (LMML). The predecessor works and their bundled
+components (including the `net.sistr.littlemaidmodelloader` package) remain
+under their respective original licenses (e.g. the LittleMaid Licence); this
+MIT license applies only to this project's own new and adapted code.
