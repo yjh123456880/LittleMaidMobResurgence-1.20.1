@@ -9,6 +9,7 @@ output/
 bin/
 libs/*
 !libs/README.md
+blockbench/
 
 .classpath
 .project
