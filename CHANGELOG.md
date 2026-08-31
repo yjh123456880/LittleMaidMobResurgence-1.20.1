@@ -2,6 +2,16 @@
 
 All notable changes to **LittleMaidMobResurgence (小女仆：归来)** are documented in this file.
 
+## [0.11] - 2026-08-31
+
+### Changed
+
+- Version bumped to 0.11. This build includes bug fixes made after the v0.10 upload and is intended as the initial public release.
+
+### Fixed
+
+- Various bugs discovered after the v0.10 upload were fixed.
+
 ## [0.10] - 2026-08-31
 
 ### Added

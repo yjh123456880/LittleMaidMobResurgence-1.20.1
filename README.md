@@ -76,7 +76,7 @@ $env:JAVA_HOME = '<你的 JDK 17 路径>'
 .\gradlew.bat :forge:build -x spotlessCheck --console=plain
 ```
 
-构建产物：`forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.10-Forge.jar`
+构建产物：`forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.11-Forge.jar`
 
 > **注意**：`forge/build.gradle` 通过 `modCompileOnly files("../libs/*.jar")` 引用部分模组的编译用 jar。
 > 首次克隆后需将对应 jar 放入 `libs/` 目录（见 [libs/README.md](libs/README.md)），否则编译期会报依赖缺失。
@@ -133,7 +133,7 @@ $env:JAVA_HOME = '<your JDK 17 path>'
 .\gradlew.bat :forge:build -x spotlessCheck --console=plain
 ```
 
-Artifact: `forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.10-Forge.jar`
+Artifact: `forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.11-Forge.jar`
 
 > **Note**: `forge/build.gradle` references some mod jars at compile time via `modCompileOnly files("../libs/*.jar")`.
 > After a fresh clone, place the required jars into `libs/` (see [libs/README.md](libs/README.md)), otherwise compilation will fail.
@@ -191,7 +191,7 @@ $env:JAVA_HOME = '<JDK 17 のパス>'
 .\gradlew.bat :forge:build -x spotlessCheck --console=plain
 ```
 
-成果物：`forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.10-Forge.jar`
+成果物：`forge\build\libs\Little Maid Mob Resurgence-1.20.1-0.11-Forge.jar`
 
 > **注意**：`forge/build.gradle` は `modCompileOnly files("../libs/*.jar")` で一部モッドの jar を参照します。
 > クローン直後は `libs/` に対応 jar を配置してください（[libs/README.md](libs/README.md) 参照）。無いとコンパイルに失敗します。
