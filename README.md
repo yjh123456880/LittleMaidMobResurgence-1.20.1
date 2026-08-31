@@ -63,6 +63,10 @@ Full credit and heartfelt thanks to their original authors:
 - **Curios**：女仆饰品界面始终可用；仅当安装 Curios 时才有兼容饰品槽位（未安装时仅固定扩容背包道具槽）
 - **新生魔艺（Ars Nouveau）**、**Iron's Spells 铁魔法**、**诡厄巫法（Goety）**：魔法战斗模式
 
+### 已知问题
+
+- 部分光影包（光影着色器）下，女仆的气泡文本可能出现渲染异常（字符缺失或显示错乱）。原版渲染不受影响；如遇此问题，请更换光影或关闭相关后期处理。
+
 ### 构建
 
 环境要求：**JDK 17**（Minecraft 1.20.1 Forge 强制）。
@@ -115,6 +119,10 @@ kept and rebuilt, with many new anthropomorphic features on top.
 - **TACZ**: gunner mode with ammo search across the inventory/expanded backpack
 - **Curios**: the maid trinket UI is always available; compatible trinket slots only appear when Curios is installed (otherwise only the fixed backpack-upgrade slot)
 - **Ars Nouveau**, **Iron's Spells**, **Goety**: magic battle modes
+
+### Known Issues
+
+- Under some shader packs, the maid's speech bubble text may render incorrectly (missing or garbled characters). Vanilla rendering is unaffected; please switch shaders or disable the relevant post-processing if you encounter this.
 
 ### Building
 
@@ -169,6 +177,10 @@ components keep their original licenses; MIT applies only to this project's own 
 - **TACZ**：ガンナーモード。インベントリ・拡張バックパック内の弾薬を検索してリロード
 - **Curios**：メイドのアクセサリUIは常に使用可能。Curios 導入時のみ互換アクセサリスロットが表示されます（未導入時は固定の拡張バックパック枠のみ）
 - **Ars Nouveau / Iron's Spells / Goety**：魔法戦闘モード
+
+### 既知の問題
+
+- 一部のシェーダーパックで、メイドの吹き出しテキストが正しく描画されないことがあります（文字欠け・文字化け）。バニラ描画には影響ありません。発生した場合はシェーダーを変更するか、該当するポストプロセッシングを無効にしてください。
 
 ### ビルド
 
