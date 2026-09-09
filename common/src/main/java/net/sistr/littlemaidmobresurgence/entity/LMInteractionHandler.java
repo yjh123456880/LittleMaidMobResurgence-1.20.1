@@ -31,6 +31,13 @@ final class LMInteractionHandler {
 
     static ActionResult handle(LittleMaidEntity maid, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
+        // [zh] 反叛状态全禁用交互：任何右键（女仆杖/捕捉蛋/shift 取物/喂食/开关/开背包 GUI）一律拒绝。
+        // [en] Rebellion fully disables interactions: every right-click path (maid stick, capture egg, shift-take,
+        //     feeding, switches, opening the inventory GUI) is rejected while the maid is rebellious.
+        // [ja] 反乱中はすべての操作を拒否します（メイドステッキ・捕獲卵・Shift取り出し・餌やり・切替・インベントリGUI）。
+        if (maid.isRebellious()) {
+            return ActionResult.PASS;
+        }
         // [zh] 女仆杖：绑定/清除信息（必须在 sneaking 判定前处理）
         // [en] Maid stick: bind/clear logic must run before the sneaking branch.
         // [ja] メイドステッキ：登録・解除はスニーク判定より先に処理。
@@ -154,6 +161,18 @@ final class LMInteractionHandler {
         if (stack.getItem() == Items.GUNPOWDER) {
             return handleGunpowder(maid, player, stack);
         }
+        // [zh] 手持雪球右键 = 邀请打雪仗（限时互掷，结束后加心情，有冷却防刷）
+        // [en] Right-click with a snowball invites the maid to a snowball fight (timed, mood reward, cooldown).
+        // [ja] 雪玉を持って右クリックで雪合戦を招待します（時間制、機嫌ボーナス、クールダウンあり）。
+        if (stack.isOf(Items.SNOWBALL)) {
+            if (!maid.getWorld().isClient) {
+                if (!maid.startSnowFight(player)) {
+                    return ActionResult.PASS;
+                }
+                consumeItem(player, stack, 1);
+            }
+            return ActionResult.success(maid.getWorld().isClient);
+        }
         maid.openInventory(player);
         return ActionResult.success(maid.getWorld().isClient);
     }
@@ -196,6 +215,12 @@ final class LMInteractionHandler {
     }
 
     private static ActionResult handleSaddle(LittleMaidEntity maid, PlayerEntity player) {
+        // [zh] 罢工/避战/休息/雪仗中不允许坐上玩家肩头
+        // [en] Mounting the player's shoulders is unavailable while striking, evading, resting or fighting.
+        // [ja] ストライキ・回避・休息・雪合戦中は肩車できません。
+        if (maid.isStrike() || maid.isInRecoveryState() || maid.isSnowFighting()) {
+            return ActionResult.PASS;
+        }
         if (!maid.hasVehicle()) {
             if (player.hasPassengers()) {
                 player.removeAllPassengers();
@@ -297,24 +322,18 @@ final class LMInteractionHandler {
         if (!maid.getWorld().isClient) {
             var food = stack.getItem().getFoodComponent();
             if (food != null) {
-                // [zh] 恢复饥饿（营养值 × 4 → 0-100 刻度）
-                // [en] Restore hunger (nutrition × 4 → 0-100 scale).
-                // [ja] 満腹度を回復（栄養値×4 → 0-100 スケール）。
+                // [zh] 恢复量（营养值 × 4 → 0-100 刻度）延后到进食动画完整结束才发放，防止喂食即得/抢走白嫖。
+                // [en] The restore amount (nutrition × 4 → 0-100 scale) is granted only when the eating
+                //     animation fully finishes, preventing instant rewards and steal-while-eating exploits.
+                // [ja] 回復量（栄養×4 → 0-100）は食事アニメが最後まで完了してから付与します。
                 int restore = Math.max(1, food.getHunger() * 4);
-                maid.setHunger(maid.getHungerValue() + restore);
-                // [zh] 好感度 + 心情值（喂食也顺带安抚怒气）
-                // [en] Favorability + mood (feeding also soothes anger).
-                // [ja] 好感度＋機嫌（餌やりで怒りも鎮めます）。
-                maid.maidMood.onFed();
-                maid.syncMood();
-                MaidSpeech.onFed(maid);
+                // [zh] 进食动画：副手拿食物放到嘴边；饥饿/心情/好感在动画结束的方法内一次性发放。
+                // [en] Eating animation starts now; hunger/mood/favorability are granted once in the completion path.
+                // [ja] 食事アニメ開始。満腹度・機嫌・好感度は完了処理で一度だけ付与します。
+                ItemStack foodStack = stack.copy();
+                foodStack.setCount(1);
+                maid.startPlayerFedEating(foodStack, restore);
             }
-            // [zh] 进食动画：副手拿食物放到嘴边，速度与玩家一致，并减速
-            // [en] Eating animation: food held to the mouth at vanilla speed with the eating slow-down.
-            // [ja] 食事アニメ：オフハンドで食物を口元へ。速度はバニラと同等で減速します。
-            ItemStack foodStack = stack.copy();
-            foodStack.setCount(1);
-            maid.startEatingItem(foodStack);
         }
         maid.playSound(SoundEvents.ENTITY_GENERIC_EAT, 1.0F, 1.0F);
         consumeItem(player, stack, 1);

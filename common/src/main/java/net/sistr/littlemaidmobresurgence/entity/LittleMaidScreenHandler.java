@@ -70,12 +70,21 @@ public class LittleMaidScreenHandler extends ScreenHandler
 
                         @Override
                         public ItemStack removeStack(int slot, int amount) {
+                            // [zh] 进食/持糖动画中的临时副手物品不可取走（防“抢走白嫖/刷物品”）
+                            // [en] The temporary off-hand item during eating/sugar animations cannot be taken.
+                            // [ja] 食事・砂糖アニメ中の一時オフハンドは取り出せません。
+                            if (slot == 1 && (maid.isEating() || maid.isSugarConsuming())) {
+                                return ItemStack.EMPTY;
+                            }
                             EquipmentSlot equipmentSlot = index(slot);
                             return maid.getEquippedStack(equipmentSlot).split(amount);
                         }
 
                         @Override
                         public ItemStack removeStack(int slot) {
+                            if (slot == 1 && (maid.isEating() || maid.isSugarConsuming())) {
+                                return ItemStack.EMPTY;
+                            }
                             ItemStack result;
                             EquipmentSlot equipmentSlot = index(slot);
                             result = maid.getEquippedStack(equipmentSlot);
@@ -85,6 +94,9 @@ public class LittleMaidScreenHandler extends ScreenHandler
 
                         @Override
                         public void setStack(int slot, ItemStack stack) {
+                            if (slot == 1 && (maid.isEating() || maid.isSugarConsuming())) {
+                                return;
+                            }
                             EquipmentSlot equipmentSlot = index(slot);
                             maid.equipStack(equipmentSlot, stack);
                         }
@@ -302,6 +314,19 @@ public class LittleMaidScreenHandler extends ScreenHandler
                     @Override
                     public Pair<Identifier, Identifier> getBackgroundSprite() {
                         return Pair.of(atlas, new Identifier("item/empty_armor_slot_shield"));
+                    }
+
+                    // [zh] 进食/持糖动画期间锁定副手槽：不可放入、不可取走，杜绝取走动画副本白嫖
+                    // [en] Lock the off-hand slot during eating/sugar animations: no insert, no take-out.
+                    // [ja] 食事・砂糖アニメ中はオフハンド枠をロック（出し入れ不可）。
+                    @Override
+                    public boolean canTakeItems(PlayerEntity player) {
+                        return !maid.isEating() && !maid.isSugarConsuming();
+                    }
+
+                    @Override
+                    public boolean canInsert(ItemStack stack) {
+                        return !maid.isEating() && !maid.isSugarConsuming();
                     }
                 });
 

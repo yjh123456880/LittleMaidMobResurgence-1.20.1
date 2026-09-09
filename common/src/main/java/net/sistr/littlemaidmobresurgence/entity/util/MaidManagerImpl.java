@@ -15,6 +15,11 @@ public class MaidManagerImpl implements MaidManager {
     }
 
     @Override
+    public void removeMaid(UUID uuid) {
+        maidMap.remove(uuid);
+    }
+
+    @Override
     public List<LMInfo> getMaidList() {
         return List.copyOf(maidMap.values());
     }

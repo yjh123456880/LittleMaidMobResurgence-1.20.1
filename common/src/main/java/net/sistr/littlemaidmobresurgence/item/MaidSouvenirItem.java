@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.sistr.littlemaidmobresurgence.entity.LittleMaidEntity;
 import net.sistr.littlemaidmobresurgence.entity.MaidSpeech;
 import net.sistr.littlemaidmobresurgence.entity.util.TameableUtil;
+import net.sistr.littlemaidmobresurgence.LMMRMod;
 import net.sistr.littlemaidmobresurgence.setup.Registration;
 import org.jetbrains.annotations.Nullable;
 
@@ -168,6 +169,11 @@ public class MaidSouvenirItem extends Item {
         // [en] Revived maid enters the rest state (sits and recovers until 50% HP) instead of striking.
         // [ja] 復活メイドは休息状態（HP50%まで座って回復）。ストライキは使いません。
         maid.setSouvenirReviveRest(true);
+        // [zh] 复活饥饿下限：饿死女仆以 0 饥饿复活会立刻再次饿死，这里保证至少 reviveHunger（默认 50）。
+        // [en] Hunger floor on revival: a maid that starved to death would otherwise respawn at 0 hunger and starve again.
+        // [ja] 復活時の満腹度下限。餓死したメイドは満腹度0で蘇ると再び餓死するため、最低値を保証します。
+        maid.setHunger(
+                Math.max(maid.getHungerValue(), LMMRMod.getConfig().hunger.reviveHunger));
         // [zh] 复活时情绪下限为 10，并清空反叛/愤怒残留，避免复活后立刻反叛
         // [en] Mood is raised to at least 10 and anger is cleared so the revived maid does not instantly rebel.
         // [ja] 復活時の機嫌下限を10にし、反乱・怒りの残滓をクリアして即反乱を防ぎます。

@@ -2,6 +2,7 @@ package net.sistr.littlemaidmobresurgence.mixin;
 
 import com.mojang.datafixers.util.Either;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -113,6 +114,11 @@ public abstract class MixinServerPlayerEntity extends MixinPlayerEntity implemen
     @Override
     public void registerMaid(LittleMaidEntity maid) {
         this.maidManager.registerMaid(maid);
+    }
+
+    @Override
+    public void removeMaid(UUID uuid) {
+        this.maidManager.removeMaid(uuid);
     }
 
     @Override

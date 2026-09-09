@@ -27,6 +27,7 @@ import net.sistr.littlemaidmobresurgence.entity.util.MaidManager;
 import net.sistr.littlemaidmobresurgence.entity.util.TameableUtil;
 import net.sistr.littlemaidmobresurgence.network.C2SCallWaitPacket;
 import net.sistr.littlemaidmobresurgence.network.C2SOpenInventoryPacket;
+import net.sistr.littlemaidmobresurgence.network.C2SRemoveMaidRecordPacket;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -67,10 +68,19 @@ public class MaidManagerScreen extends Screen {
         }
         String finalWorldId = currentWorldId;
         List<MaidInfoCard> cards = lmInfoList.stream()
-                .map(info -> new MaidInfoCard(tr, info))
+                .map(info -> new MaidInfoCard(tr, info, this::removeEntry))
                 .sorted(createSortComparator(finalWorldId))
                 .collect(Collectors.toList());
         allEntries.addAll(cards);
+    }
+
+    /** [zh] 从管理界面移除一条记录并请求服务器同步删除（仅清记录，不影响实体/纪念品）。 */
+    private void removeEntry(MaidInfoCard card) {
+        allEntries.remove(card);
+        C2SRemoveMaidRecordPacket.sendC2SPacket(card.info.id());
+        String keyword = searchField != null ? searchField.getText() : "";
+        currentPage = 0;
+        applyFilter(keyword);
     }
 
     @Override
@@ -274,15 +284,22 @@ public class MaidManagerScreen extends Screen {
     }
 
     private static class MaidInfoCard {
+        interface DeleteCallback {
+            void onDelete(MaidInfoCard card);
+        }
+
         final TextRenderer textRenderer;
         final MaidManager.LMInfo info;
         private final LittleMaidScreen.IconButtonWidget inventoryButton;
         private final ButtonWidget callWaitButton;
+        private final LittleMaidScreen.IconButtonWidget deleteButton;
+        private final DeleteCallback deleteCallback;
         private int x, y;
 
-        MaidInfoCard(TextRenderer tr, MaidManager.LMInfo info) {
+        MaidInfoCard(TextRenderer tr, MaidManager.LMInfo info, DeleteCallback deleteCallback) {
             this.textRenderer = tr;
             this.info = info;
+            this.deleteCallback = deleteCallback;
             this.inventoryButton =
                     new LittleMaidScreen.IconButtonWidget(
                             0, 0,
@@ -295,6 +312,18 @@ public class MaidManagerScreen extends Screen {
                                     onPress -> toggleCallWait())
                             .size(40, 18)
                             .build();
+            this.deleteButton =
+                    new LittleMaidScreen.IconButtonWidget(
+                            0, 0,
+                            new ItemStack(Items.BARRIER),
+                            Text.translatable("gui.littlemaidmobresurgence.maidmanager.delete"),
+                            (button) -> delete());
+        }
+
+        private void delete() {
+            if (deleteCallback != null) {
+                deleteCallback.onDelete(this);
+            }
         }
 
         String getSearchHaystack() {
@@ -438,6 +467,10 @@ public class MaidManagerScreen extends Screen {
                     .ifPresent(e -> InventoryScreen.drawEntity(
                             ctx, entityX, entityY, entitySize, 20, 0, e));
 
+            // 删除按钮始终显示（含死亡/未加载记录），置于卡片右上角
+            deleteButton.setPosition(x + w - 21, y + 2);
+            deleteButton.render(ctx, mouseX, mouseY, delta);
+
             if (canInteractWithMaid()) {
                 // 按钮组（箱子20 + 间距4 + 切换40）垂直在卡片内居中，水平整体右移18px（约1cm）避免遮挡关键信息
                 int btnGroupX = x + w / 2 - 14;
@@ -465,6 +498,7 @@ public class MaidManagerScreen extends Screen {
 
         boolean mouseClicked(double mx, double my, int btn) {
             if (btn != 0) return false;
+            if (deleteButton.mouseClicked(mx, my, btn)) return true;
             if (!canInteractWithMaid()) return false;
             if (inventoryButton.mouseClicked(mx, my, btn)) return true;
             if (callWaitButton.mouseClicked(mx, my, btn)) return true;

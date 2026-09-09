@@ -73,6 +73,9 @@ final class LMGoalInitializer {
         // 休息踱步（起身阶段在休息点附近走动，不受行动模式限制）
         maid.getGoalSelector().add(++priority, new RestPaceGoal(maid));
 
+        // 玩家邀请的打雪仗小游戏（高于工作/战斗模式，低于休息/避战）
+        maid.getGoalSelector().add(++priority, new SnowFightGoal(maid));
+
         maid.getGoalSelector()
                 .add(
                         ++priority,

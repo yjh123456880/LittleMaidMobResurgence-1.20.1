@@ -205,6 +205,9 @@ public class LittleMaidEntity extends TameableEntity
      */
     private static final TrackedData<Boolean> FORCE_CHUNK_LOAD =
             DataTracker.registerData(LittleMaidEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    /** [zh] 车万女仆模型 ID（空=用 LMML 自身模型；仅客户端渲染使用）。 */
+    private static final TrackedData<String> TLM_MODEL_ID =
+            DataTracker.registerData(LittleMaidEntity.class, TrackedDataHandlerRegistry.STRING);
     private int hungerTickCounter = 0;
     private int hungerEatCounter = 0;
     // [zh] 委托对象们
@@ -359,6 +362,16 @@ public class LittleMaidEntity extends TameableEntity
      * [ja] 休息の起点（休息中の歩行はこの地点を中心に行い、移動モードの制約を受けません）。
      */
     @Nullable private BlockPos restAnchor;
+    /** [zh] 打雪仗进行中（仅服务端会话字段，不持久化）。 */
+    private boolean snowFighting = false;
+    /** 打雪仗剩余 tick（200 = 10 秒）。 */
+    private int snowFightTicks = 0;
+    /** 距离上一次雪仗结束的冷却 tick（防刷心情）。 */
+    private int snowFightCooldownTicks = 0;
+    /** 打雪仗对手（邀请玩家）的实体 ID。 */
+    private int snowFightPartnerId = -1;
+    /** 本次雪仗是否已发放心情奖励（结束/取消只发一次）。 */
+    private boolean snowFightRewardGranted = false;
     /** 女仆杖绑定的工作范围中心（仅当女仆处于自由行动时作为锁定圆心生效）。 */
     @Nullable private BlockPos boundWorkCenter;
     /** 绑定范围所在维度（与中心成对设置/清除）。 */
@@ -508,6 +521,7 @@ public class LittleMaidEntity extends TameableEntity
         this.dataTracker.startTracking(REST_SIT_PROGRESS, 0.0F);
         this.dataTracker.startTracking(SUGAR_CONSUMING, false);
         this.dataTracker.startTracking(FORCE_CHUNK_LOAD, false);
+        this.dataTracker.startTracking(TLM_MODEL_ID, "");
     }
 
     public void addDefaultModes(LittleMaidEntity maid) {
@@ -545,6 +559,7 @@ public class LittleMaidEntity extends TameableEntity
             writeTargetTags(nbt);
         }
         this.multiModel.writeToNbt(nbt);
+        nbt.putString("TlmModelId", getTlmModelId());
         nbt.putString("SoundConfigName", getConfigHolder().getName());
 
         nbt.putInt("accelerationTicks", accelerationTicks);
@@ -627,6 +642,9 @@ public class LittleMaidEntity extends TameableEntity
             readTargetTags(nbt);
         }
         this.multiModel.readFromNbt(nbt);
+        if (nbt.contains("TlmModelId")) {
+            setTlmModelId(nbt.getString("TlmModelId"));
+        }
         this.calculateDimensions();
         if (nbt.contains("SoundConfigName")) {
             LMConfigManager.INSTANCE
@@ -832,12 +850,32 @@ public class LittleMaidEntity extends TameableEntity
         this.dataTracker.set(HUNGER, Math.max(0, Math.min(100, hunger)));
     }
 
+    /** [zh] 车万女仆模型 ID（空=使用 LMML 自身模型）。 */
+    public String getTlmModelId() {
+        return this.dataTracker.get(TLM_MODEL_ID);
+    }
+
+    /** [zh] 设置车万女仆模型 ID（服务端写入后经 DataTracker 同步给客户端渲染）。 */
+    public void setTlmModelId(String modelId) {
+        this.dataTracker.set(TLM_MODEL_ID, modelId == null ? "" : modelId);
+    }
+
     /** 是否正在"持糖消耗"（副手短暂展示糖后恢复饱食度，客户端据此抬起手臂）。 */
     public boolean isSugarConsuming() {
         return this.dataTracker.get(SUGAR_CONSUMING);
     }
 
     private void tickHunger() {
+        // [zh] 未认主（野生）女仆没有饥饿值：始终满腹，不衰减、不进食、不饿死；认主后饥饿系统才生效。
+        // [en] Ownerless (wild) maids have no hunger: always full, never decay/eat/starve; hunger applies after contracting.
+        // [ja] 主人のいない（野良）メイドは満腹度を持ちません。常に満腹で減衰・食事・餓死もなく、契約後にのみ有効です。
+        if (TameableUtil.getTameOwnerUuid(this).isEmpty()) {
+            this.hungerTickCounter = 0;
+            this.hungerEatCounter = 0;
+            this.hungerStarveCounter = 0;
+            setHunger(100);
+            return;
+        }
         var config = LMMRMod.getConfig().hunger;
         // 空腹値の減少（設定間隔毎に1）
         if (hungerTickCounter <= 0) {
@@ -1031,6 +1069,21 @@ public class LittleMaidEntity extends TameableEntity
         this.eatingPlayerFed = true;
     }
 
+    /**
+     * [zh] 玩家主动喂食入口：记录待发放的饥饿量，动画完整结束后一次性发放饥饿/心情/好感（防喂食即得/抢走白嫖）。
+     * [en] Player-fed entry: stores the pending hunger amount and grants hunger/mood/favorability once the full
+     *     eating animation completes (prevents instant rewards and steal-while-eating exploits).
+     * [ja] プレイヤーからの餌やり入口：回復予定の満腹度を保存し、食事アニメ完了時に一度だけ各種回復を付与します。
+     */
+    public void startPlayerFedEating(ItemStack food, int hungerRestore) {
+        if (this.getWorld().isClient) {
+            return;
+        }
+        this.pendingHungerRestore = Math.max(0, hungerRestore);
+        startEatingAnimation(food);
+        this.eatingPlayerFed = true;
+    }
+
     /** 進食経過処理：咀嚼粒子 + 原版吃完（isUsingItem 结束）或计时结束后恢复副手。 */
     private void tickEatingAnimation() {
         if (this.eatingTicks <= 0) {
@@ -1052,38 +1105,68 @@ public class LittleMaidEntity extends TameableEntity
                     0.05);
         }
         this.eatingTicks--;
-        // 原版已吃完该物品（不同食物使用时长不同）时提前结束
-        if (this.eatingTicks == 0 || !this.isUsingItem()) {
-            // 吃完时应用食物的药水效果（金苹果/腐肉/河豚等，概率同原版）
+        // 动画未结束但使用状态被中断（副手食物被取走/主动停止）：取消并绝不发放奖励，防止白嫖/刷取
+        if (this.eatingTicks > 0 && !this.isUsingItem()) {
+            cancelEatingAnimation();
+            return;
+        }
+        if (this.eatingTicks > 0) {
+            return;
+        }
+        // 完整吃完：按来源一次性发放奖励
+        if (!this.getWorld().isClient) {
+            // 食物附带药水效果（金苹果/腐肉/河豚等，概率同原版）
             applyFoodEffects(this.getEatingStack());
-            // 进食动画完成才恢复饥饿值、回血、提升好感/心情
-            if (!this.getWorld().isClient) {
-                var config = LMMRMod.getConfig().hunger;
+            var config = LMMRMod.getConfig().hunger;
+            if (this.eatingPlayerFed) {
+                // [zh] 玩家喂食：饥饿 + onFed（心情/好感）仅在此发放一次，移除进食完成的二次心情叠加。
+                // [en] Player-fed: hunger + onFed (mood/favorability) granted here only, no second mood gain on completion.
+                // [ja] プレイヤーから与えた場合：満腹度と onFed（機嫌・好感度）をここで一度だけ付与。
                 if (this.pendingHungerRestore > 0) {
                     setHunger(getHungerValue() + this.pendingHungerRestore);
                     this.pendingHungerRestore = 0;
                 }
-                // 回血加速
                 if (this.getHealth() < this.getMaxHealth()) {
                     this.heal(config.hungerHealBoost);
                 }
-                // 好感度・心情値上昇（設定値を使用）
+                maidMood.onFed();
+                syncMood();
+                MaidSpeech.onFed(this);
+            } else {
+                // [zh] 自动进食：饥饿 + 回血 + 仅自动进食的心情/好感，独立台词。
+                // [en] Auto-eat: hunger + heal + auto-eat mood/favorability only, with its own speech line.
+                // [ja] 自動食事：満腹度＋回復＋自動食事専用の機嫌・好感度。専用セリフも再生。
+                if (this.pendingHungerRestore > 0) {
+                    setHunger(getHungerValue() + this.pendingHungerRestore);
+                    this.pendingHungerRestore = 0;
+                }
+                if (this.getHealth() < this.getMaxHealth()) {
+                    this.heal(config.hungerHealBoost);
+                }
                 maidMood.addFavorability(config.hungerFavorabilityGainOnEat);
                 maidMood.addMood(config.hungerMoodGainOnEat);
                 syncMood();
-                // 台词按进食来源区分：自动进食播独立台词；玩家喂食的 onFed 台词已在
-                // 喂食瞬间播放，动画结束不覆盖（此前会被 onSelfEat 顶掉）
-                if (!this.eatingPlayerFed) {
-                    MaidSpeech.onSelfEat(this);
-                }
-                this.eatingPlayerFed = false;
+                MaidSpeech.onSelfEat(this);
             }
-            this.eatingTicks = 0;
-            this.clearActiveItem();
-            this.setStackInHand(Hand.OFF_HAND, this.eatingStoredOffHand);
-            this.eatingStoredOffHand = ItemStack.EMPTY;
-            this.dataTracker.set(EATING_STACK, ItemStack.EMPTY);
+            this.eatingPlayerFed = false;
         }
+        resetEatingState();
+    }
+
+    /** 取消进食：不发放任何奖励，恢复副手与状态。 */
+    private void cancelEatingAnimation() {
+        this.eatingTicks = 0;
+        this.pendingHungerRestore = 0;
+        this.eatingPlayerFed = false;
+        resetEatingState();
+    }
+
+    /** 进食结束共用的清理：清除使用状态、还原副手、清空进食堆栈。 */
+    private void resetEatingState() {
+        this.clearActiveItem();
+        this.setStackInHand(Hand.OFF_HAND, this.eatingStoredOffHand);
+        this.eatingStoredOffHand = ItemStack.EMPTY;
+        this.dataTracker.set(EATING_STACK, ItemStack.EMPTY);
     }
 
     /** 应用食物附带的药水效果（中毒/凋零/饥饿/夜视/金苹果吸收等，概率与原版一致）。 */
@@ -1353,6 +1436,7 @@ public class LittleMaidEntity extends TameableEntity
               updateEvadeState();
               updateRestState();
               tickRestSitAnimation();
+              tickSnowFight();
               // 强加载：女仆所在区块被强制加载，移动时自动迁移；关闭时解除
               updateForceChunk();
             // 反叛时循环播放怒气粒子：特效持续 20 tick，消失后再停 0.5s（10 tick）播下一轮
@@ -1695,13 +1779,17 @@ public class LittleMaidEntity extends TameableEntity
         if (this.getWorld().isClient) {
             return;
         }
+        var movementConfig = LMMRMod.getConfig().movement;
         float ratio = this.getHealth() / this.getMaxHealth();
         boolean battleMode = this.getMode().map(Mode::isBattleMode).orElse(false);
         boolean hasEnemies = !this.restNoEnemy;
 
         if (!this.evading) {
             // 进入避战：战斗模式 + 血量<5% + 附近有敌人（且非罢工）
-            if (battleMode && ratio < EVADE_ENTER_RATIO && hasEnemies && !this.isStrike()) {
+            if (battleMode
+                    && ratio < movementConfig.evadeEnterRatio
+                    && hasEnemies
+                    && !this.isStrike()) {
                 // 若正在休息则先退出休息
                 if (this.resting) {
                     this.resting = false;
@@ -1717,7 +1805,7 @@ public class LittleMaidEntity extends TameableEntity
             return;
         }
         // 避战中
-        if (ratio >= EVADE_EXIT_RATIO) {
+        if (ratio >= movementConfig.evadeExitRatio) {
             // 血量≥30%：解除避战，转头迎击
             this.evading = false;
             this.evadeNoEnemyTicks = 0;
@@ -1748,6 +1836,7 @@ public class LittleMaidEntity extends TameableEntity
         if (this.getWorld().isClient) {
             return;
         }
+        var movementConfig = LMMRMod.getConfig().movement;
         float ratio = this.getHealth() / this.getMaxHealth();
         // 附近敌人扫描（每 20 tick 一次，避免每 tick 全量扫描）
         if (--this.restEnemyScanCooldown <= 0) {
@@ -1765,7 +1854,9 @@ public class LittleMaidEntity extends TameableEntity
                     !this.isStrike()
                             && !this.evading
                             && noEnemy
-                            && (this.souvenirReviveRest ? ratio < REST_EXIT_RATIO : ratio < REST_ENTER_RATIO);
+                            && (this.souvenirReviveRest
+                                    ? ratio < movementConfig.restExitRatio
+                                    : ratio < movementConfig.restEnterRatio);
             if (enter) {
                 this.resting = true;
                 this.restPhaseTimer = 0;
@@ -1774,7 +1865,8 @@ public class LittleMaidEntity extends TameableEntity
             }
         }
         // 退出条件：血量≥50% 或 进入罢工（两状态不兼容）
-        if (this.resting && (ratio >= REST_EXIT_RATIO || this.isStrike())) {
+        if (this.resting
+                && (ratio >= movementConfig.restExitRatio || this.isStrike())) {
             this.resting = false;
             this.souvenirReviveRest = false;
             this.restSitting = false;
@@ -1836,7 +1928,8 @@ public class LittleMaidEntity extends TameableEntity
         java.util.List<MobEntity> enemies =
                 serverWorld.getEntitiesByClass(
                         MobEntity.class,
-                        this.getBoundingBox().expand(REST_ENEMY_RANGE),
+                        this.getBoundingBox()
+                                .expand(LMMRMod.getConfig().movement.restEnemyRange),
                         mob -> mob.isAlive() && !mob.isRemoved() && isHostileToMaid(this, mob));
         this.restNoEnemy = enemies.isEmpty();
         this.nearestHostile =
@@ -1983,6 +2076,10 @@ public class LittleMaidEntity extends TameableEntity
                   fleeFrom(player);
               }
         }
+        // 受伤瞬间立即评估避战：血量低于配置阈值且战斗模式时不等 20 tick 扫描，先脱离再反击
+        if (!this.getWorld().isClient && result && amount > 0F) {
+            checkImmediateEvade(attacker);
+        }
         if (!this.getWorld().isClient && !isHurtTime) {
             if (result
                     && 0 < amount
@@ -2003,6 +2100,38 @@ public class LittleMaidEntity extends TameableEntity
             }
         }
         return result;
+    }
+
+    /**
+     * [zh] 受伤瞬间的避战快速评估：把攻击者视为当前敌对并立刻跑一次避战状态更新，
+     *     避免“攻击欲望强、残血想跑却因扫描间隔没触发”的问题。
+     * [en] Immediate evade evaluation on taking damage: treats the attacker as the nearest hostile
+     *     and runs the evade-state update at once (no 20-tick scan delay).
+     * [ja] 被弾直後の回避判定：攻撃者を直近の敵とみなして即座に回避状態へ更新します。
+     */
+    private void checkImmediateEvade(@Nullable Entity attacker) {
+        if (this.getWorld().isClient
+                || this.evading
+                || this.resting
+                || this.isStrike()
+                || this.isRebellious()) {
+            return;
+        }
+        if (!this.getMode().map(Mode::isBattleMode).orElse(false)) {
+            return;
+        }
+        float ratio = this.getHealth() / this.getMaxHealth();
+        if (ratio >= LMMRMod.getConfig().movement.evadeEnterRatio) {
+            return;
+        }
+        if (attacker instanceof LivingEntity living
+                && living.isAlive()
+                && !living.isRemoved()
+                && !TameableUtil.isFriend(this, living)) {
+            this.restNoEnemy = false;
+            this.nearestHostile = living;
+            updateEvadeState();
+        }
     }
 
     /**
@@ -2117,18 +2246,8 @@ public class LittleMaidEntity extends TameableEntity
 
     /** 自动台词触发冷却：气泡结束后再等一段时间才允许下一条自动台词，避免刷屏。 */
     private static final int AUTO_SPEECH_COOLDOWN = 100;
-    /** 休息状态进入阈值（血量/最大血量 < 5%）。 */
-    private static final float REST_ENTER_RATIO = 0.05F;
-    /** 休息状态解除阈值（血量/最大血量 ≥ 50%）。 */
-    private static final float REST_EXIT_RATIO = 0.5F;
     /** 休息坐/站阶段时长（tick，约 3.5 秒）。 */
     private static final int REST_PHASE_TICKS = 70;
-    /** 休息状态检测"附近敌人"的范围（格）。 */
-    private static final double REST_ENEMY_RANGE = 16.0D;
-    /** 避战进入阈值（血量/最大血量 < 5%）。 */
-    private static final float EVADE_ENTER_RATIO = 0.05F;
-    /** 避战解除阈值（血量/最大血量 ≥ 30%，转头迎击）。 */
-    private static final float EVADE_EXIT_RATIO = 0.30F;
     /** 避战期间附近持续无敌人达到该 tick 数（200=10 秒）后转休息状态。 */
     private static final int EVADE_TO_REST_TICKS = 200;
     /** 自动台词（tickSpeechEvents）触发后的冷却剩余时间。 */
@@ -2976,6 +3095,93 @@ public class LittleMaidEntity extends TameableEntity
 
     public void setPlayingSnow(boolean isPlayingSnow) {
         this.setLMMFlag(PLAYING_SNOW_INDEX, isPlayingSnow);
+    }
+
+    /** 是否正在进行玩家邀请的打雪仗小游戏（服务端）。 */
+    public boolean isSnowFighting() {
+        return snowFighting;
+    }
+
+    /** 打雪仗对手（邀请玩家）的实体 ID。 */
+    public int getSnowFightPartnerId() {
+        return snowFightPartnerId;
+    }
+
+    /**
+     * [zh] 开始打雪仗：校验状态后锁定对手 200 tick（10 秒），由 SnowFightGoal 投掷雪球。
+     * [en] Starts a snowball fight: validates state, locks the partner for 200 ticks, throws via SnowFightGoal.
+     * [ja] 雪合戦を開始します：状態を検証して200tick（10秒）相手を固定し、SnowFightGoalが雪玉を投げます。
+     */
+    public boolean startSnowFight(PlayerEntity player) {
+        if (this.getWorld().isClient
+                || this.snowFighting
+                || TameableUtil.isWait(this)
+                || this.isStrike()
+                || this.isInRecoveryState()
+                || this.isRebellious()
+                || this.isPlayingSnow()
+                || this.snowFightCooldownTicks > 0) {
+            return false;
+        }
+        this.snowFighting = true;
+        this.snowFightTicks = 200;
+        this.snowFightPartnerId = player.getId();
+        this.snowFightRewardGranted = false;
+        this.snowFightCooldownTicks = 0;
+        this.setPlayingSnow(true);
+        this.setTarget(null);
+        this.getNavigation().stop();
+        return true;
+    }
+
+    /** 正常结束雪仗：发放一次心情奖励并进入冷却。 */
+    public void finishSnowFight() {
+        if (!this.snowFighting) {
+            return;
+        }
+        this.snowFighting = false;
+        this.snowFightTicks = 0;
+        this.snowFightPartnerId = -1;
+        this.setPlayingSnow(false);
+        this.setSneaking(false);
+        this.snowFightCooldownTicks =
+                LMMRMod.getConfig().mood.snowFightCooldown;
+        if (!this.snowFightRewardGranted && !this.getWorld().isClient) {
+            this.snowFightRewardGranted = true;
+            this.maidMood.addMood(LMMRMod.getConfig().mood.snowFightMoodGain);
+            this.syncMood();
+        }
+    }
+
+    /** 提前取消雪仗（对手消失/过远）：不发放奖励，仍进入冷却。 */
+    public void cancelSnowFight() {
+        if (!this.snowFighting) {
+            return;
+        }
+        this.snowFighting = false;
+        this.snowFightTicks = 0;
+        this.snowFightPartnerId = -1;
+        this.setPlayingSnow(false);
+        this.setSneaking(false);
+        this.snowFightCooldownTicks =
+                LMMRMod.getConfig().mood.snowFightCooldown;
+    }
+
+    /** 服务端逐 tick：冷却递减；雪仗计时归零时正常结束。 */
+    private void tickSnowFight() {
+        if (this.getWorld().isClient) {
+            return;
+        }
+        if (this.snowFightCooldownTicks > 0) {
+            this.snowFightCooldownTicks--;
+        }
+        if (!this.snowFighting) {
+            return;
+        }
+        this.snowFightTicks--;
+        if (this.snowFightTicks <= 0) {
+            finishSnowFight();
+        }
     }
 
     // 音声関係

@@ -4,10 +4,12 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.MobEntity;
+import net.sistr.littlemaidmobresurgence.LMMRMod;
 import net.sistr.littlemaidmobresurgence.entity.LittleMaidEntity;
 import net.sistr.littlemaidmobresurgence.entity.targeting.TargetTagManager;
 import net.sistr.littlemaidmobresurgence.entity.targeting.TargetingConfig;
 import net.sistr.littlemaidmobresurgence.entity.targeting.TargetingSystem;
+import net.sistr.littlemaidmobresurgence.entity.util.MovingMode;
 import net.sistr.littlemaidmobresurgence.entity.util.TameableUtil;
 
 /**
@@ -103,7 +105,7 @@ public class LMTargetGoal extends Goal {
             return targeting();
         }
         // 現在のターゲットがまだ有効かチェック
-        if (!isTargetable(this.target, TargetingConfig.getAlertRange())) {
+        if (!isTargetable(this.target, getSearchRange())) {
             // ターゲットが居なくなったら再計算
             return targeting();
         }
@@ -134,7 +136,7 @@ public class LMTargetGoal extends Goal {
     }
 
     private List<MobEntity> getAroundMobs() {
-        float distance = TargetingConfig.getAlertRange();
+        float distance = getSearchRange();
         return this.maid
                 .getWorld()
                 .getEntitiesByClass(
@@ -156,7 +158,7 @@ public class LMTargetGoal extends Goal {
     }
 
     private List<LittleMaidEntity> getAroundMaids() {
-        float distance = TargetingConfig.getAlertRange();
+        float distance = getSearchRange();
         return this.maid
                 .getWorld()
                 .getEntitiesByClass(
@@ -166,5 +168,25 @@ public class LMTargetGoal extends Goal {
                                 .expand(distance, distance / 2f, distance)
                                 .expand(1),
                         maid -> maid != this.maid);
+    }
+
+    /**
+     * [zh] 索敌半径：在默认警戒范围内再收敛到女仆当前移动模式的限定半径
+     *     （自由=工作范围、跟随=跟随范围），红石巡逻保持默认警戒范围。
+     * [en] Target-search radius: the default alert range is additionally capped by the maid's current
+     *     movement-mode confinement radius (freedom = work range, follow = follow range).
+     * [ja] 索敵半径：既定警戒範囲を、現在の移動モードの制限半径（自由=作業範囲、追従=追従範囲）で上限します。
+     */
+    private float getSearchRange() {
+        float alert = TargetingConfig.getAlertRange();
+        float radius;
+        if (this.maid.getMovingMode() == MovingMode.FREEDOM) {
+            radius = LMMRMod.getConfig().work.workRange;
+        } else if (this.maid.getMovingMode() == MovingMode.ESCORT) {
+            radius = LMMRMod.getConfig().movement.followRange;
+        } else {
+            return alert;
+        }
+        return Math.min(alert, radius);
     }
 }

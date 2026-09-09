@@ -18,6 +18,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Arm;
@@ -141,6 +142,16 @@ public class MaidModelRenderer
         if (restSitProgress > 0.01F) {
             matrixStack.translate(
                     0.0F, -LMMRMod.getConfig().client.restSitDrop * restSitProgress, 0.0F);
+        }
+        // 肩车：把模型垂直落点修正到配置的肩部高度（相对玩家脚底，默认 y≈+1.25）。
+        // 原版骑乘玩家的默认高度随实体不同，这里以当前实际骑乘高度为基准做差值修正。
+        if (livingEntity.getVehicle() instanceof PlayerEntity) {
+            double baseHeight = livingEntity.getY() - livingEntity.getVehicle().getY();
+            float delta =
+                    (float) (LMMRMod.getConfig().movement.piggybackHeightOffset - baseHeight);
+            if (Math.abs(delta) > 0.001F) {
+                matrixStack.translate(0.0F, delta, 0.0F);
+            }
         }
         super.render(
                 livingEntity, entityYaw, partialTicks, matrixStack, vertexConsumerProvider, light);

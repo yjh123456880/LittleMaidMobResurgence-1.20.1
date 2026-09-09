@@ -40,6 +40,12 @@ public class C2SCallWaitPacket {
         if (!(entity instanceof LittleMaidEntity maid) || !TameableUtil.isTameOwner(maid, player)) {
             return;
         }
+        // [zh] 反叛期间禁用管理界面的召唤/待命操作（反叛=全交互禁用）
+        // [en] Calling/waiting is disabled while the maid is rebellious (rebellion disables all interactions).
+        // [ja] 反乱中は管理画面からの呼び寄せ・待機操作を拒否します。
+        if (maid.isRebellious()) {
+            return;
+        }
         if (maid.isStrike()) {
             return;
         }

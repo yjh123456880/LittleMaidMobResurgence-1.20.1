@@ -42,6 +42,12 @@ public class C2SOpenInventoryPacket {
         if (TameableUtil.getTameOwnerUuid(maid)
                 .filter(uuid -> player.getUuid().equals(uuid))
                 .isPresent()) {
+            // [zh] 反叛期间禁止打开背包/GUI（与右键全禁用一致）
+            // [en] Opening the inventory/GUI is disabled while rebellious.
+            // [ja] 反乱中はインベントリ・GUIを開けません。
+            if (maid.isRebellious()) {
+                return;
+            }
             maid.openInventory(player);
         }
     }

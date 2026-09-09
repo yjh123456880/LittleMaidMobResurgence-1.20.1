@@ -71,6 +71,11 @@ public class LMMRForge {
         if (dev.architectury.platform.Platform.isModLoaded("ars_nouveau")) {
             ArsNouveauCompatImpl.init();
         }
+        // 车万女仆联动：仅在客户端且检测到 TLM 时注册 IMaid 转换与模型选择入口
+        if (FMLEnvironment.dist == Dist.CLIENT
+                && dev.architectury.platform.Platform.isModLoaded("touhou_little_maid")) {
+            TlmCompatClient.init();
+        }
 
         ModLoadingContext.get()
                 .registerExtensionPoint(
@@ -159,7 +164,12 @@ public class LMMRForge {
 
     // ClientSetupよりこちらの方が実行が早いため、ClientSetupからArchitecturyのメソッド登録しようとすると無視される
     public void renderInit(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(Registration.LITTLE_MAID_MOB.get(), MaidModelRenderer::new);
+        if (dev.architectury.platform.Platform.isModLoaded("touhou_little_maid")) {
+            // TLM 联动渲染器：无 TLM 模型时内部回退到 LMML 渲染器
+            event.registerEntityRenderer(Registration.LITTLE_MAID_MOB.get(), LittleMaidTlmRenderer::new);
+        } else {
+            event.registerEntityRenderer(Registration.LITTLE_MAID_MOB.get(), MaidModelRenderer::new);
+        }
         event.registerEntityRenderer(
                 Registration.REBELLION_PROXY_ENTITY.get(), RebellionProxyRenderer::new);
         // 女仆休息座位：不可见，使用空渲染器

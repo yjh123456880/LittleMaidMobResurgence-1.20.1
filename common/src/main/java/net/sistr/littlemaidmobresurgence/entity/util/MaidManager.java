@@ -15,6 +15,13 @@ import org.jetbrains.annotations.Nullable;
 public interface MaidManager {
     void registerMaid(LittleMaidEntity maid);
 
+    /**
+     * [zh] 从管理列表删除一条女仆记录（不作用于世界中的实体/纪念品）。
+     * [en] Removes one maid record from the manager list (does not affect the entity or souvenir in the world).
+     * [ja] 管理リストからメイド記録を1件削除します（ワールド上の実体・記念品には影響しません）。
+     */
+    void removeMaid(java.util.UUID uuid);
+
     List<LMInfo> getMaidList();
 
     void writeMaidManager(NbtCompound nbt);

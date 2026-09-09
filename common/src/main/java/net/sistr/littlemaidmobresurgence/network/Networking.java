@@ -79,6 +79,14 @@ public class Networking {
                 NetworkManager.Side.C2S, C2SCallWaitPacket.ID, C2SCallWaitPacket::receiveC2SPacket);
         NetworkManager.registerReceiver(
                 NetworkManager.Side.C2S,
+                C2SRemoveMaidRecordPacket.ID,
+                C2SRemoveMaidRecordPacket::receiveC2SPacket);
+        NetworkManager.registerReceiver(
+                NetworkManager.Side.C2S,
+                C2SSetTlmModelPacket.ID,
+                C2SSetTlmModelPacket::receiveC2SPacket);
+        NetworkManager.registerReceiver(
+                NetworkManager.Side.C2S,
                 C2SSetAutoEatPacket.ID,
                 C2SSetAutoEatPacket::receiveC2SPacket);
         NetworkManager.registerReceiver(

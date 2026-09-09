@@ -90,13 +90,25 @@ public class LMMRConfig implements ConfigData {
         @ConfigEntry.Gui.Tooltip public int moodDropOnOwnerAttack = 1;
         @ConfigEntry.Gui.Tooltip public int favorabilityDropOnOwnerAttack = 1;
         @ConfigEntry.Gui.Tooltip public int favorabilityGainOnFeed = 1;
-        @ConfigEntry.Gui.Tooltip public int moodGainOnFeed = 4;
+        @ConfigEntry.Gui.Tooltip public int moodGainOnFeed = 2;
         @ConfigEntry.Gui.Tooltip public int angerDuration = 600;
         @ConfigEntry.Gui.Tooltip public int moodAngryThreshold = 30;
         @ConfigEntry.Gui.Tooltip public int moodRecoveryTarget = 60;
         @ConfigEntry.Gui.Tooltip public int moodRecoveryInterval = 400;
         @ConfigEntry.Gui.Tooltip public int leashSpeechMoodDrop = 2;
         @ConfigEntry.Gui.Tooltip public int leashSpeechFavorabilityDrop = 2;
+        /**
+         * [zh] 打雪仗结束后的心情奖励（防刷：见雪仗冷却）。
+         * [en] Mood reward after a snowball fight ends (anti-farm: see the fight cooldown).
+         * [ja] 雪合戦終了時の機嫌ボーナス（乱用防止：クールダウンは雪合戦クール欄参照）。
+         */
+        @ConfigEntry.Gui.Tooltip public int snowFightMoodGain = 1;
+        /**
+         * [zh] 同一女仆两次打雪仗邀请的最小间隔（tick，600 = 30 秒）。
+         * [en] Minimum interval between two snowball-fight invites for the same maid (ticks; 600 = 30 s).
+         * [ja] 同じメイドへの雪合戦招待の最小間隔（tick、600=30秒）。
+         */
+        @ConfigEntry.Gui.Tooltip public int snowFightCooldown = 600;
     // [zh] 好感度等级→固定最大血量见 MaidMood.getMaxHealthForLevel（Lv1=20 … Lv5=200），不纳入配置
     // [en] Favorability level → fixed max HP is defined in MaidMood.getMaxHealthForLevel (Lv1=20 ... Lv5=200), not configurable.
     // [ja] 好感度レベル→固定最大HPは MaidMood.getMaxHealthForLevel を参照（Lv1=20 … Lv5=200）。設定項目にはしません。
@@ -171,6 +183,22 @@ public class LMMRConfig implements ConfigData {
         @ConfigEntry.Gui.Tooltip public List<String> pickupItemWhitelistTags = Lists.newArrayList();
         @ConfigEntry.Gui.RequiresRestart @ConfigEntry.Gui.Tooltip public float escapeSpeed = 1.2f;
         @ConfigEntry.Gui.Tooltip public int pathRecalcInterval = 10;
+        /**
+         * [zh] 避战/休息状态的血量阈值与敌情扫描半径（格）：进入避战、解除避战、进入休息、解除休息、敌人扫描范围。
+         * [en] HP-ratio thresholds for the evade/rest states and the hostile scan radius (blocks).
+         * [ja] 回避・休息状態の体力閾値と敵スキャン半径（ブロック）。
+         */
+        @ConfigEntry.Gui.Tooltip public float evadeEnterRatio = 0.10f;
+        @ConfigEntry.Gui.Tooltip public float evadeExitRatio = 0.30f;
+        @ConfigEntry.Gui.Tooltip public float restEnterRatio = 0.05f;
+        @ConfigEntry.Gui.Tooltip public float restExitRatio = 0.50f;
+        @ConfigEntry.Gui.Tooltip public double restEnemyRange = 16.0d;
+        /**
+         * [zh] 女仆坐在玩家肩头时的垂直偏移（格，相对玩家脚下）。原版骑乘高度偏腰，此项将其抬到肩部。
+         * [en] Vertical offset (blocks, relative to the player's feet) when a maid rides on the player's shoulders.
+         * [ja] メイドがプレイヤーの肩に乗っているときの高さオフセット（ブロック、プレイヤー足元基準）。
+         */
+        @ConfigEntry.Gui.Tooltip public double piggybackHeightOffset = 1.25d;
     }
 
     @ConfigEntry.Category("work")
@@ -335,6 +363,12 @@ public class LMMRConfig implements ConfigData {
         @ConfigEntry.Gui.Tooltip public int hungerEatInterval = 40;
         @ConfigEntry.Gui.Tooltip public int hungerStarveInterval = 80;
         @ConfigEntry.Gui.Tooltip public float hungerStarveDamage = 1.0f;
+        /**
+         * [zh] 纪念品复活时饥饿值的下限（0-100）：避免饿死女仆以 0 饥饿复活后立刻再次饿死。
+         * [en] Minimum hunger (0-100) applied when reviving a maid from a souvenir, preventing an instant starvation loop.
+         * [ja] 記念品で復活したメイドに保証する満腹度の下限（0-100）。餓死直後にまた餓死するループを防ぎます。
+         */
+        @ConfigEntry.Gui.Tooltip public int reviveHunger = 50;
         /**
          * [zh] 「无时无刻进食」档位的进食间隔（tick，600 = 30 秒）。
          * [en] Eating interval for the "always eat" mode (ticks; 600 = 30 seconds).
