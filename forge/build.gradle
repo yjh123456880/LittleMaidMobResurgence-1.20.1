@@ -55,6 +55,9 @@ dependencies {
     // Curios 饰品模组（可选运行时依赖，仅编译期引用，用于女仆饰品栏）
     modCompileOnly files("../libs/curios-forge-5.14.1+1.20.1.jar")
 
+    // 车万女仆 Touhou Little Maid（可选联动，仅编译期引用；运行时检测 mod 存在后再加载联动类）
+    modCompileOnly files("../libs/tlm-1.5.3-forge+mc1.20.1.jar")
+
     // 三大魔法模组 + 铁魔法依赖库（可选运行时依赖，仅编译期引用，用于女仆魔法模式）
     // 注：Goety 适配器采用反射实现（不编译期依赖 Goety 类），以规避其 jar 混合映射导致的 Loom 重映射冲突
     modCompileOnly files("../libs/ars_nouveau-1.20.1-4.1.0.jar")

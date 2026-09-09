@@ -1,16 +1,11 @@
 package net.sistr.littlemaidmobresurgence.forge;
 
 import com.github.tartaricacid.touhoulittlemaid.api.event.ConvertMaidEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
-import net.sistr.littlemaidmobresurgence.client.screen.LittleMaidScreen;
 import net.sistr.littlemaidmobresurgence.entity.LittleMaidEntity;
-import net.sistr.littlemaidmobresurgence.entity.LittleMaidScreenHandler;
 
 /**
  * [zh] 车万女仆客户端联动：把本模组女仆注册进 TLM 的 IMaid 转换事件。
@@ -26,39 +21,19 @@ public final class TlmCompatClient {
 
     public static void init() {
         MinecraftForge.EVENT_BUS.addListener(TlmCompatClient::onConvertMaid);
-        MinecraftForge.EVENT_BUS.addListener(TlmCompatClient::onScreenInit);
+        MinecraftForge.EVENT_BUS.addListener(TlmCompatClient::onClientLogout);
     }
 
     private static void onConvertMaid(ConvertMaidEvent event) {
         if (event.getEntity() instanceof LittleMaidEntity maid
                 && maid.getWorld().isClient) {
-            event.setMaid(new LittleMaidImaid(maid));
+            // 返回按女仆缓存的同一包装实例，保证车万 Gecko 能力/动画控制器状态连续
+            event.setMaid(LittleMaidImaidCache.get(maid));
         }
     }
 
-    /** 在本模组女仆主界面右下角添加“车万模型”按钮（仅 TLM 存在时界面才出现）。 */
-    private static void onScreenInit(ScreenEvent.Init event) {
-        if (!(event.getScreen() instanceof LittleMaidScreen screen)) {
-            return;
-        }
-        LittleMaidScreenHandler handler = screen.getScreenHandler();
-        LittleMaidEntity maid = handler.getGuiEntity();
-        if (maid == null) {
-            return;
-        }
-        ButtonWidget tlmButton =
-                ButtonWidget.builder(
-                                Text.translatable("gui.littlemaidmobresurgence.tlm.open"),
-                                b -> {
-                                    if (MinecraftClient.getInstance() != null) {
-                                        MinecraftClient.getInstance().setScreen(
-                                                new TlmModelSelectScreen(maid));
-                                    }
-                                })
-                        .size(64, 20)
-                        .build();
-        tlmButton.setX(screen.width - 74);
-        tlmButton.setY(screen.height - 24);
-        event.addListener(tlmButton);
+    /** 退出世界时清理按实体缓存的 IMaid 包装，避免跨世界残留。 */
+    private static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        LittleMaidImaidCache.clear();
     }
 }

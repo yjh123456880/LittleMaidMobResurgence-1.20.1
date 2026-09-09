@@ -238,6 +238,11 @@ public class LittleMaidScreen extends HandledScreen<LittleMaidScreenHandler> {
                                                 : toPickup));
                     }
                 });
+        // 平台联动按钮（车万女仆模型入口等）：加入左侧图标列，保持与现有按钮同款、同间距
+        for (ButtonWidget extra :
+                EPMaidScreenExtra.createExtraButtons(this, owner, left, top, size, layer)) {
+            this.addDrawableChild(extra);
+        }
         layer = -1;
         this.addDrawableChild(
                 new IconButtonWidget(

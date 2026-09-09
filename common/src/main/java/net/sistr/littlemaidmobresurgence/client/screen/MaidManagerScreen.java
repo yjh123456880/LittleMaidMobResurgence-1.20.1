@@ -467,8 +467,10 @@ public class MaidManagerScreen extends Screen {
                     .ifPresent(e -> InventoryScreen.drawEntity(
                             ctx, entityX, entityY, entitySize, 20, 0, e));
 
-            // 删除按钮始终显示（含死亡/未加载记录），置于卡片右上角
-            deleteButton.setPosition(x + w - 21, y + 2);
+            // 删除按钮固定放在按钮组第三格（与待命按钮并排），死亡/未加载记录同样显示
+            int buttonY = y + (h - 20) / 2;
+            int deleteX = x + w / 2 + 54;
+            deleteButton.setPosition(deleteX, buttonY);
             deleteButton.render(ctx, mouseX, mouseY, delta);
 
             if (canInteractWithMaid()) {

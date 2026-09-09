@@ -340,6 +340,13 @@ public class LMMRConfig implements ConfigData {
          * [ja] メイドが砂糖を手に持つ消費アニメーションの時間（tick、20tick=1秒）。
          */
         @ConfigEntry.Gui.Tooltip public int sugarConsumeDuration = 12;
+        /**
+         * [zh] 车万女仆联动：深度动画桥接（任务/手持物/好感度/背包/乞求等状态映射）。关闭后仅保留模型渲染与基础待机动画。
+         * [en] TLM integration: deep animation bridge (task, held items, favorability, backpack, begging, etc.).
+         *     When disabled, only model rendering and the basic idle task remain.
+         * [ja] TLM連携：深度アニメーション連携（タスク・手持ち・好感度・リュック・おねだり等）。無効時はモデル描画と基本待機のみ。
+         */
+        @ConfigEntry.Gui.Tooltip public boolean tlmDeepAnimation = true;
     }
 
     @ConfigEntry.Category("hunger")

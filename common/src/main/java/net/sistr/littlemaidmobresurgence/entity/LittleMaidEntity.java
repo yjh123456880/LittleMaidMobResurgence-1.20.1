@@ -208,6 +208,12 @@ public class LittleMaidEntity extends TameableEntity
     /** [zh] 车万女仆模型 ID（空=用 LMML 自身模型；仅客户端渲染使用）。 */
     private static final TrackedData<String> TLM_MODEL_ID =
             DataTracker.registerData(LittleMaidEntity.class, TrackedDataHandlerRegistry.STRING);
+    /** [zh] 同步给客户端的扩容背包等级（TLM 动画桥接用；背包槽本身不常驻同步）。 */
+    private static final TrackedData<Integer> SYNCED_BACKPACK_LEVEL =
+            DataTracker.registerData(LittleMaidEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    /** [zh] 同步给客户端的经验值（TLM 动画桥接用）。 */
+    private static final TrackedData<Integer> SYNCED_XP =
+            DataTracker.registerData(LittleMaidEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private int hungerTickCounter = 0;
     private int hungerEatCounter = 0;
     // [zh] 委托对象们
@@ -522,6 +528,8 @@ public class LittleMaidEntity extends TameableEntity
         this.dataTracker.startTracking(SUGAR_CONSUMING, false);
         this.dataTracker.startTracking(FORCE_CHUNK_LOAD, false);
         this.dataTracker.startTracking(TLM_MODEL_ID, "");
+        this.dataTracker.startTracking(SYNCED_BACKPACK_LEVEL, 0);
+        this.dataTracker.startTracking(SYNCED_XP, 0);
     }
 
     public void addDefaultModes(LittleMaidEntity maid) {
@@ -602,6 +610,7 @@ public class LittleMaidEntity extends TameableEntity
             }
         }
         this.experiencePoints = nbt.getInt("XpTotal");
+        this.dataTracker.set(SYNCED_XP, this.experiencePoints);
         if (maidVersion == 0) {
             var list = nbt.getList("Inventory", 10);
             for (int i = 0; i < list.size(); i++) {
@@ -662,6 +671,7 @@ public class LittleMaidEntity extends TameableEntity
         if (nbt.contains("AutoEatThreshold")) {
             setAutoEatThreshold(nbt.getInt("AutoEatThreshold"));
         }
+        this.dataTracker.set(SYNCED_BACKPACK_LEVEL, getBackpackUpgradeLevel());
         if (nbt.contains("AnimalMaidNbt")) {
             animalMaidNbt = nbt.getCompound("AnimalMaidNbt");
         }
@@ -858,6 +868,16 @@ public class LittleMaidEntity extends TameableEntity
     /** [zh] 设置车万女仆模型 ID（服务端写入后经 DataTracker 同步给客户端渲染）。 */
     public void setTlmModelId(String modelId) {
         this.dataTracker.set(TLM_MODEL_ID, modelId == null ? "" : modelId);
+    }
+
+    /** [zh] 客户端可读的扩容背包等级（用于 TLM 背包动画桥接）。 */
+    public int getSyncedBackpackLevel() {
+        return this.dataTracker.get(SYNCED_BACKPACK_LEVEL);
+    }
+
+    /** [zh] 客户端可读的经验值（用于 TLM 动画桥接）。 */
+    public int getSyncedExperiencePoints() {
+        return this.dataTracker.get(SYNCED_XP);
     }
 
     /** 是否正在"持糖消耗"（副手短暂展示糖后恢复饱食度，客户端据此抬起手臂）。 */
@@ -1410,6 +1430,11 @@ public class LittleMaidEntity extends TameableEntity
         if (!this.getWorld().isClient) {
             // 背包扩容格数随扩容道具等级变化
             littleMaidInventory.setExtraSlotCount(getBackpackExtraSlots());
+            // 每 20 tick 同步背包等级/经验给客户端（TLM 动画桥接读取）
+            if (this.age % 20 == 0) {
+                this.dataTracker.set(SYNCED_BACKPACK_LEVEL, getBackpackUpgradeLevel());
+                this.dataTracker.set(SYNCED_XP, this.experiencePoints);
+            }
             if (this.fleeingTicks > 0) {
                 this.fleeingTicks--;
             }
@@ -2425,7 +2450,7 @@ public class LittleMaidEntity extends TameableEntity
         return LMInteractionHandler.handle(this, player, hand);
     }
 
-    int getExperiencePoints() {
+    public int getExperiencePoints() {
         return this.experiencePoints;
     }
 
