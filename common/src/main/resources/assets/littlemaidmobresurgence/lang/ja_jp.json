@@ -90,7 +90,7 @@
   "gui.littlemaidmobresurgence.maidmanager.call": "呼び出し",
   "gui.littlemaidmobresurgence.maidmanager.delete": "記録を削除（元に戻せません）",
   "gui.littlemaidmobresurgence.tlm.open": "TLMモデル",
-  "gui.littlemaidmobresurgence.tlm.restore": "LMMLモデルに戻す",
+  "gui.littlemaidmobresurgence.tlm.restore": "元に戻す",
   "gui.littlemaidmobresurgence.maidmanager.wait": "待機",
   "gui.littlemaidmobresurgence.maidmanager.loaded": "ロード済み",
   "gui.littlemaidmobresurgence.maidmanager.unloaded": "未ロード",

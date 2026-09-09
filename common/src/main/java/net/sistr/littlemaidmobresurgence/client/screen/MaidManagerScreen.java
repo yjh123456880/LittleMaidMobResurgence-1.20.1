@@ -467,11 +467,14 @@ public class MaidManagerScreen extends Screen {
                     .ifPresent(e -> InventoryScreen.drawEntity(
                             ctx, entityX, entityY, entitySize, 20, 0, e));
 
-            // 删除按钮固定放在按钮组第三格（与待命按钮并排），死亡/未加载记录同样显示
-            int buttonY = y + (h - 20) / 2;
-            int deleteX = x + w / 2 + 54;
-            deleteButton.setPosition(deleteX, buttonY);
-            deleteButton.render(ctx, mouseX, mouseY, delta);
+            // 删除按钮固定放在按钮组第三格（与待命按钮并排），仅对已死亡记录显示
+            boolean canDelete = info.status() == MaidManager.Status.DEAD;
+            if (canDelete) {
+                int buttonY = y + (h - 20) / 2;
+                int deleteX = x + w / 2 + 54;
+                deleteButton.setPosition(deleteX, buttonY);
+                deleteButton.render(ctx, mouseX, mouseY, delta);
+            }
 
             if (canInteractWithMaid()) {
                 // 按钮组（箱子20 + 间距4 + 切换40）垂直在卡片内居中，水平整体右移18px（约1cm）避免遮挡关键信息
@@ -500,7 +503,10 @@ public class MaidManagerScreen extends Screen {
 
         boolean mouseClicked(double mx, double my, int btn) {
             if (btn != 0) return false;
-            if (deleteButton.mouseClicked(mx, my, btn)) return true;
+            if (info.status() == MaidManager.Status.DEAD
+                    && deleteButton.mouseClicked(mx, my, btn)) {
+                return true;
+            }
             if (!canInteractWithMaid()) return false;
             if (inventoryButton.mouseClicked(mx, my, btn)) return true;
             if (callWaitButton.mouseClicked(mx, my, btn)) return true;

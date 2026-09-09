@@ -22,6 +22,13 @@ public interface MaidManager {
      */
     void removeMaid(java.util.UUID uuid);
 
+    /**
+     * [zh] 标记女仆已死亡：管理界面仅对已死亡记录显示删除按钮。
+     * [en] Marks the maid as dead: the manager GUI only shows the delete button for dead records.
+     * [ja] メイドを死亡扱いにします。管理画面では死亡記録のみ削除ボタンを表示します。
+     */
+    void markMaidDead(LittleMaidEntity maid);
+
     List<LMInfo> getMaidList();
 
     void writeMaidManager(NbtCompound nbt);
@@ -74,9 +81,11 @@ public interface MaidManager {
             String name = infoNbt.getString("name");
             // 兼容旧存档：旧版 SOUL_ENTITY/SOUL_WITHIN 状态一律降级为 UNLOADED
             Status status =
-                    "ALIVE".equals(infoNbt.getString("status"))
-                            ? Status.ALIVE
-                            : Status.UNLOADED;
+                    switch (infoNbt.getString("status")) {
+                        case "ALIVE" -> Status.ALIVE;
+                        case "DEAD" -> Status.DEAD;
+                        default -> Status.UNLOADED;
+                    };
             UUID id = infoNbt.getUuid("id");
             BlockPos lastPos = BlockPos.ORIGIN;
             if (infoNbt.contains("lastPos")) {
@@ -88,7 +97,7 @@ public interface MaidManager {
             if (infoNbt.contains("entityId")) {
                 entityId = infoNbt.getInt("entityId");
             }
-            return new MaidLMInfo(id, name, lastPos, worldId, null, entityId);
+            return new MaidLMInfo(id, name, lastPos, worldId, null, entityId, status);
         }
 
         public Optional<Entity> getEntityClient(World world) {
@@ -124,8 +133,9 @@ public interface MaidManager {
                 BlockPos lastPos,
                 String worldId,
                 @Nullable LittleMaidEntity maid,
-                int entityId) {
-            super(id, name, Status.ALIVE, lastPos, worldId);
+                int entityId,
+                Status status) {
+            super(id, name, status, lastPos, worldId);
             this.maid = maid;
             this.entityId = entityId;
         }
@@ -141,7 +151,20 @@ public interface MaidManager {
                     maid.getBlockPos(),
                     maid.getWorld().getRegistryKey().getValue().toString(),
                     loaded ? maid : null,
-                    loaded ? maid.getId() : -1);
+                    loaded ? maid.getId() : -1,
+                    loaded ? Status.ALIVE : Status.UNLOADED);
+        }
+
+        /** [zh] 死亡记录：保留最后位置/名字，用于管理界面清理。 */
+        public static MaidLMInfo createDead(LittleMaidEntity maid) {
+            return new MaidLMInfo(
+                    maid.getUuid(),
+                    maid.getName().getString(),
+                    maid.getBlockPos(),
+                    maid.getWorld().getRegistryKey().getValue().toString(),
+                    null,
+                    -1,
+                    Status.DEAD);
         }
 
         @Override
@@ -162,6 +185,7 @@ public interface MaidManager {
 
     enum Status {
         ALIVE(Text.literal("Alive").formatted(Formatting.WHITE)), // 生きてる
+        DEAD(Text.literal("Dead").formatted(Formatting.RED)), // 死亡
         UNLOADED(Text.literal("Unloaded").formatted(Formatting.GRAY)); // 読み込まれていない/死亡済み
 
         private final Text text;

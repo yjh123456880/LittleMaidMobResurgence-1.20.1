@@ -1731,6 +1731,10 @@ public class LittleMaidEntity extends TameableEntity
         if (this.getWorld() instanceof ServerWorld serverWorld && reason.shouldDestroy()) {
             // 收纳（捕捉蛋）时跳过纪念品掉落
             if (TameableUtil.getTameOwnerUuid(this).isPresent() && !this.captureSuppressSouvenir) {
+                // 管理记录标记为 DEAD：管理界面仅对已死亡记录显示删除按钮
+                TameableUtil.getTameOwner(this)
+                        .filter(owner -> owner instanceof MaidManager)
+                        .ifPresent(owner -> ((MaidManager) owner).markMaidDead(this));
                 ItemStack souvenir = MaidSouvenirItem.createSouvenir(this);
                 var souvenirEntity =
                         new MaidSouvenirEntity(

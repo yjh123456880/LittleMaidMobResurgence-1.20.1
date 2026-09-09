@@ -122,6 +122,11 @@ public abstract class MixinServerPlayerEntity extends MixinPlayerEntity implemen
     }
 
     @Override
+    public void markMaidDead(LittleMaidEntity maid) {
+        this.maidManager.markMaidDead(maid);
+    }
+
+    @Override
     public List<MaidManager.LMInfo> getMaidList() {
         return this.maidManager.getMaidList();
     }

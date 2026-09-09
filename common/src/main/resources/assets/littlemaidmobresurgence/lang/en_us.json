@@ -90,7 +90,7 @@
   "gui.littlemaidmobresurgence.maidmanager.call": "Call",
   "gui.littlemaidmobresurgence.maidmanager.delete": "Delete Record (irreversible)",
   "gui.littlemaidmobresurgence.tlm.open": "TLM Models",
-  "gui.littlemaidmobresurgence.tlm.restore": "Restore LMML Model",
+  "gui.littlemaidmobresurgence.tlm.restore": "Restore",
   "gui.littlemaidmobresurgence.maidmanager.wait": "Wait",
   "gui.littlemaidmobresurgence.maidmanager.loaded": "Loaded",
   "gui.littlemaidmobresurgence.maidmanager.unloaded": "Unloaded",

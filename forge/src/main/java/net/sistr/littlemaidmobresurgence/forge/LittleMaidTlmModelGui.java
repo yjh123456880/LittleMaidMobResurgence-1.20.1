@@ -52,6 +52,7 @@ public class LittleMaidTlmModelGui extends MaidModelGui {
         super.init();
         int startX = this.width / 2 + 50;
         int startY = this.height / 2;
+        // 放在车万面板右下角内部（面板范围 startX-128..startX+128 / startY-80..startY+100），避开滚动条
         ButtonWidget restoreButton =
                 ButtonWidget.builder(
                                 Text.translatable("gui.littlemaidmobresurgence.tlm.restore"),
@@ -59,8 +60,8 @@ public class LittleMaidTlmModelGui extends MaidModelGui {
                                     C2SSetTlmModelPacket.sendC2SPacket(realMaid, "");
                                     this.close();
                                 })
-                        .position(startX - 96, startY + 122)
-                        .size(98, 18)
+                        .position(startX + 56, startY + 80)
+                        .size(60, 18)
                         .build();
         this.addDrawableChild(restoreButton);
     }

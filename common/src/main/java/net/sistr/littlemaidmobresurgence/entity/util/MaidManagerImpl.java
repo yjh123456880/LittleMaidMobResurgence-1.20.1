@@ -20,6 +20,11 @@ public class MaidManagerImpl implements MaidManager {
     }
 
     @Override
+    public void markMaidDead(LittleMaidEntity maid) {
+        maidMap.put(maid.getUuid(), MaidLMInfo.createDead(maid));
+    }
+
+    @Override
     public List<LMInfo> getMaidList() {
         return List.copyOf(maidMap.values());
     }
@@ -68,13 +73,19 @@ public class MaidManagerImpl implements MaidManager {
                         o -> {
                             var entity = o.get();
                             // エンティティが死亡 or ワールドが読み込まれていない
-                            if (!entity.isAlive()
-                                    || entity.getServer()
-                                                    .getWorld(entity.getWorld().getRegistryKey())
-                                            == null) {
-                                if (entity instanceof LittleMaidEntity maid) {
-                                    updates.put(maid.getUuid(), MaidLMInfo.create(maid, false));
-                                }
+                            if (entity instanceof LittleMaidEntity maid
+                                    && (!maid.isAlive()
+                                            || maid.getServer()
+                                                            .getWorld(
+                                                                    maid.getWorld()
+                                                                            .getRegistryKey())
+                                                    == null)) {
+                                // 死亡 → DEAD（可删除记录）；仅维度未加载 → UNLOADED（不可删除）
+                                updates.put(
+                                        maid.getUuid(),
+                                        maid.isAlive()
+                                                ? MaidLMInfo.create(maid, false)
+                                                : MaidLMInfo.createDead(maid));
                             }
                         });
 

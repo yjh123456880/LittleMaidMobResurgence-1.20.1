@@ -98,7 +98,7 @@
   "gui.littlemaidmobresurgence.maidmanager.call": "召唤",
   "gui.littlemaidmobresurgence.maidmanager.delete": "删除记录（不可恢复）",
   "gui.littlemaidmobresurgence.tlm.open": "车万模型",
-  "gui.littlemaidmobresurgence.tlm.restore": "还原 LMML 模型",
+  "gui.littlemaidmobresurgence.tlm.restore": "还原",
   "gui.littlemaidmobresurgence.maidmanager.wait": "待命",
   "gui.littlemaidmobresurgence.maidmanager.loaded": "已加载",
   "gui.littlemaidmobresurgence.maidmanager.unloaded": "未加载",
