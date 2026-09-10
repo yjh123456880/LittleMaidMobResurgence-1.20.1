@@ -52,7 +52,10 @@ public class LittleMaidTlmModelGui extends MaidModelGui {
         super.init();
         int startX = this.width / 2 + 50;
         int startY = this.height / 2;
-        // 放在车万面板右下角内部（面板范围 startX-128..startX+128 / startY-80..startY+100），避开滚动条
+        // 与车万放大镜搜索按钮（startX-121, startY+100, 24×21）齐平并靠其右侧 4px；
+        // 搜索模式下放大镜/搜索框会占据该行，此时隐藏“还原”按钮避免遮挡。
+        int searchTabX = startX - 121;
+        int searchTabY = startY + 100;
         ButtonWidget restoreButton =
                 ButtonWidget.builder(
                                 Text.translatable("gui.littlemaidmobresurgence.tlm.restore"),
@@ -60,10 +63,24 @@ public class LittleMaidTlmModelGui extends MaidModelGui {
                                     C2SSetTlmModelPacket.sendC2SPacket(realMaid, "");
                                     this.close();
                                 })
-                        .position(startX + 56, startY + 80)
-                        .size(60, 18)
+                        .position(searchTabX + 24 + 4, searchTabY)
+                        .size(64, 21)
                         .build();
+        restoreButton.visible = !isSearchModeActive();
         this.addDrawableChild(restoreButton);
+    }
+
+    /** 通过车万 AbstractModelGui 的 isSearchMode 字段判断当前是否处于搜索模式。 */
+    private boolean isSearchModeActive() {
+        try {
+            var field =
+                    com.github.tartaricacid.touhoulittlemaid.client.gui.entity.model.AbstractModelGui.class
+                            .getDeclaredField("isSearchMode");
+            field.setAccessible(true);
+            return field.getBoolean(this);
+        } catch (ReflectiveOperationException e) {
+            return false;
+        }
     }
 
     @Override
